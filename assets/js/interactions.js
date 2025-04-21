@@ -1,6 +1,6 @@
-// interactions.js - Fixed Sound Effect Playback
+// interactions.js - Fixed Audio Display & Button Logic
 document.addEventListener('DOMContentLoaded', () => {
-    console.log("DOM fully loaded and parsed for interactions.js v5");
+    console.log("DOM fully loaded and parsed for interactions.js v7");
 
     // --- Element Selectors ---
     const horrorBallWrapper = document.querySelector('.horror-ball-wrapper');
@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
     audioControlContainer.id = 'audio-control-container';
     const songNameDisplay = document.createElement('div');
     songNameDisplay.id = 'song-name';
-    songNameDisplay.textContent = "---";
+    songNameDisplay.textContent = "---"; // Default text
     const volumeContainer = document.createElement('div');
     volumeContainer.id = 'volume-container';
     const volumeSlider = document.createElement('input');
@@ -46,21 +46,67 @@ document.addEventListener('DOMContentLoaded', () => {
     // Controls are appended later in initAudio
 
     // --- Audio Utility Functions ---
-    function updateSongName(audioElement) { /* ... (same as before) ... */ }
-    function setVolume(volumeValue) { /* ... (same as before) ... */ }
-    function setupAudio() { /* ... (same as before) ... */ }
+    function updateSongName(audioElement) {
+        // Ensure elements exist
+        if (!audioElement || !songNameDisplay) {
+             console.warn("Cannot update song name: Audio or display element missing.");
+             if(songNameDisplay) songNameDisplay.textContent = "---";
+             return;
+        }
+
+        // Check if src is valid and seems like a real path
+        if (!audioElement.src || !audioElement.src.includes('/') || audioElement.src.endsWith('/')) {
+            songNameDisplay.textContent = "Loading...";
+            // Add listener as fallback if src isn't ready yet
+            audioElement.addEventListener('loadedmetadata', () => updateSongName(audioElement), { once: true });
+            audioElement.addEventListener('error', () => { songNameDisplay.textContent = "Audio Error"; }, { once: true }); // Handle loading errors
+            console.log("Audio src not ready, waiting for metadata:", audioElement.src);
+            return;
+        }
+
+        try {
+            const filename = audioElement.src.split('/').pop();
+            if (!filename) { songNameDisplay.textContent = "---"; return; }
+
+            const decodedName = decodeURIComponent(filename)
+                .replace(/\.(mp3|wav|ogg)$/i, '').replace(/_/g, ' ').replace(/-/g, ' - ').replace(/ {2,}/g,' ') // Normalize hyphens/spaces
+                .replace(/ \(.*?\)/g, '').trim(); // Remove parentheses content
+
+            songNameDisplay.textContent = decodedName || "---";
+            console.log("Updated song name to:", songNameDisplay.textContent);
+
+        } catch (e) {
+            console.error("Error parsing/updating song name:", e);
+            songNameDisplay.textContent = "Error";
+        }
+    }
+
+    function setVolume(volumeValue) { /* ... (same as v6) ... */ }
+    function setupAudio() { /* ... (same as v6) ... */ }
 
     // --- Function to Initialize Audio on User Interaction ---
     function initAudio() {
         if (audioInitialized) return;
         audioInitialized = true;
         console.log("Audio Initializing on user interaction...");
+
         if (audioPrompt) { audioPrompt.remove(); }
+        else { console.warn("Audio prompt element not found when trying to remove."); }
+
         document.body.appendChild(audioControlContainer);
         setupAudio();
+
+        // Try playing the initial background music
         backgroundMusic.play()
-            .then(() => { console.log("Background music playing."); updateSongName(backgroundMusic); })
-            .catch(error => { console.error('Error playing background music after interaction:', error); if (songNameDisplay) songNameDisplay.textContent = "Audio Error"; });
+            .then(() => {
+                console.log("Background music playing promise resolved.");
+                // Update name *after* play starts successfully
+                updateSongName(backgroundMusic);
+            })
+            .catch(error => {
+                console.error('Error playing background music after interaction:', error);
+                if (songNameDisplay) songNameDisplay.textContent = "Audio Error";
+            });
     }
 
     // --- Autoplay Fix: Add one-time listeners ---
@@ -82,11 +128,9 @@ document.addEventListener('DOMContentLoaded', () => {
         muteButton.addEventListener('mouseleave', scheduleHideVolumeSlider);
         muteButton.addEventListener('click', () => {
             if (!audioInitialized) initAudio();
-            isMuted = !isMuted; // This now ONLY affects music
-            // --- MUTE FIX: Only mute music files ---
-            backgroundMusic.muted = isMuted;
+            isMuted = !isMuted;
+            backgroundMusic.muted = isMuted; // Only mute music
             raveMusic.muted = isMuted;
-            // --- End MUTE FIX ---
             muteButton.textContent = isMuted ? '🔇' : '🔊';
             console.log("Music Muted:", isMuted);
         });
@@ -97,48 +141,68 @@ document.addEventListener('DOMContentLoaded', () => {
          volumeContainer.addEventListener('mouseleave', scheduleHideVolumeSlider);
     }
 
-    if (raveModeButton) { /* ... (Rave mode logic remains the same, respects isMuted for music) ... */ }
+    if (raveModeButton) {
+        raveModeButton.addEventListener('click', () => {
+            if (!audioInitialized) initAudio(); // Make sure audio is ready
+            isRaveMode = !isRaveMode;
+            console.log("Rave Mode Toggled:", isRaveMode);
+
+            // Pause both tracks before starting the correct one
+            backgroundMusic.pause();
+            raveMusic.pause();
+
+            let targetMusic = isRaveMode ? raveMusic : backgroundMusic;
+            let otherMusic = isRaveMode ? backgroundMusic : raveMusic;
+
+            // Play the target music if not muted
+            if (!isMuted) {
+                 targetMusic.play().catch(e => console.error(`Error playing ${isRaveMode ? 'rave' : 'background'} music:`, e));
+            }
+            // Always update the song name display
+            updateSongName(targetMusic);
+
+            // Dispatch the state change event for the background script
+            document.dispatchEvent(new CustomEvent('background-state-change', {
+                detail: { state: isRaveMode ? 'enhanced' : 'normal' }
+            }));
+        });
+    }
 
     // --- Hell Button Interactions ---
     if (hellButton) {
         hellButton.addEventListener('mouseenter', () => {
-             // Play static if audio is ready (regardless of music mute state)
              if (audioInitialized) {
                  tvStaticSound.currentTime = 0;
-                 // Log errors for hover sound
                  tvStaticSound.play().catch(e => console.error("Error playing static sound on hover:", e));
              }
         });
-
-        hellButton.addEventListener('mouseleave', () => {
-            tvStaticSound.pause();
-        });
+        hellButton.addEventListener('mouseleave', () => { tvStaticSound.pause(); });
 
         hellButton.addEventListener('click', (e) => {
             e.preventDefault();
-            if (!audioInitialized) initAudio(); // Try init audio if not done
+            if (!audioInitialized) initAudio();
 
             console.log('Hell Button Clicked - Triggering Transition');
 
             hellButton.classList.add('clicked');
             setTimeout(() => { hellButton.classList.remove('clicked'); }, 150);
 
-            // Stop other sounds/music
-            tvStaticSound.pause();
-            backgroundMusic.pause();
-            raveMusic.pause();
+            // Stop ALL other sounds/music first
+            try {
+                tvStaticSound.pause(); tvStaticSound.currentTime = 0;
+                backgroundMusic.pause(); // backgroundMusic.currentTime = 0; // Optional reset
+                raveMusic.pause(); // raveMusic.currentTime = 0; // Optional reset
+                console.log("Other sounds/music paused for transition.");
+            } catch (err) { console.error("Error pausing sounds:", err); }
 
-            document.dispatchEvent(new CustomEvent('background-state-change', { detail: { state: 'enhanced' } }));
+            document.dispatchEvent(new CustomEvent('background-state-change', { detail: { state: 'enhanced' } })); // Keep if needed
 
-            // Play TV shutoff sound (Always play this sound if audio initialized)
+            // Play ONLY TV shutoff sound
             if (audioInitialized) {
                  console.log("Attempting to play TV Shutoff Sound...");
                  tvShutoffSound.currentTime = 0;
                  tvShutoffSound.play().catch(e => console.error("Error playing shutoff sound:", e));
-            } else {
-                 console.warn("Audio not initialized, cannot play shutoff sound.");
-            }
-
+            } else { console.warn("Audio not initialized, cannot play shutoff sound."); }
 
             // Trigger visual transition
             if (tvShutdownOverlay) {

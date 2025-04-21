@@ -190,8 +190,8 @@
 
 /* --- Audio Prompt Style --- */
 #audio-prompt {
-   position: fixed; top: 10px; left: 10px; background-color: rgba(0,0,0,0.6);
-   color: #ccc; padding: 5px 10px; font-size: 12px; border-radius: 3px;
+   position: fixed; top: 10px; left: 10px; background-color: rgba(148, 30, 30, 0.6);
+   color: #ccc; padding: 5px 10px; font-size: 25px; border-radius: 3px;
    z-index: 1001; cursor: pointer;
 }
 
