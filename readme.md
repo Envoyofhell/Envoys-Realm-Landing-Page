@@ -6,7 +6,7 @@ A dark, interactive web experience featuring a dynamic Three.js particle backgro
 ## Features
 -   Dynamic Three.js particle cloud background with subtle "breathing" effect and mouse/touch interaction.
 -   Themed particle colors (dark reds/purples) with a brighter, faster "Rave Mode".
--   Animated "horror ball" element with default wobble and interactive shake effect on click/tap.
+-   Animated "horror pokeball" element with default wobble and interactive shake effect on click/tap.
 -   "Welcome to Hell" button with interactive hover sound and click transition effect.
 -   Background Music player with track display, volume control, mute, and Rave Mode toggle.
 -   TV shutdown screen transition effect on button click.
