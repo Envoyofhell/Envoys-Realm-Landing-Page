@@ -1,84 +1,74 @@
 // interactions.js - Handles UI interactions, audio playback, and transitions
-// Includes attempt to initialize audio on Hell Button hover (with browser limitations)
+// Includes 3 modes: Normal -> Rave -> Techno -> Normal cycle.
 // Implements 2-stage mute button: Click 1 shows slider, Click 2+ toggles mute.
+// Attempts to initialize audio on Hell Button hover (with browser limitations).
 
 document.addEventListener('DOMContentLoaded', () => {
-    console.log("DOM fully loaded and parsed for interactions.js"); // Log initialization
+    console.log("DOM fully loaded and parsed for interactions.js");
 
     // --- Element Selectors ---
-    // Get references to interactive elements in the DOM
     const horrorBallWrapper = document.querySelector('.horror-ball-wrapper');
     const horrorBall = document.querySelector('.horror-ball');
     const hellButton = document.getElementById('hell-button');
-    const audioPrompt = document.getElementById('audio-prompt'); // Prompt to enable audio
-    const tvShutdownOverlay = document.getElementById('tv-shutdown-overlay'); // Transition overlay
+    const audioPrompt = document.getElementById('audio-prompt');
+    const tvShutdownOverlay = document.getElementById('tv-shutdown-overlay');
 
-    // Basic check for essential elements
     if (!hellButton || !tvShutdownOverlay) {
         console.error("Essential HTML elements missing! (hellButton or tvShutdownOverlay)");
-        // Decide if functionality should stop; maybe some parts can proceed.
     }
     if (!audioPrompt) {
         console.warn("Audio prompt element (#audio-prompt) not found on initial load.");
     }
 
-
     // --- State Variables ---
-    let audioInitialized = false;      // Flag: Has the user interacted to allow audio?
-    let isMuted = false;               // Flag: Is the *music* currently muted? (Initial state: Not Muted)
-    let isRaveMode = false;            // Flag: Is Rave Mode active?
-    let isVolumeSliderVisible = false; // Flag: Is the volume slider currently visible? (Initial state: Hidden)
+    let audioInitialized = false;
+    let isMuted = false;               // Mute state for ALL music tracks (Initial: Not Muted)
+    let currentMode = 'normal';        // Current audio/visual mode ('normal', 'rave', 'techno')
+    let isVolumeSliderVisible = false; // Slider visibility state (Initial: Hidden)
 
     // --- Audio Management ---
-    // Create Audio objects for sounds and music
-    // IMPORTANT: Ensure these paths are correct relative to your HTML file!
+    // IMPORTANT: Replace placeholder path for technoMusic!
     const backgroundMusic = new Audio('./assets/music/Pokemon RedBlue - Pokemon tower (slowed reverb).mp3');
     const raveMusic = new Audio('./assets/music/Pokemon BlueRed - Bicycle Theme.mp3');
+    const technoMusic = new Audio('./assets/music/Pokemon Techno Remix 2010 (Pokemon Center Theme).mp3'); // <-- REPLACE THIS PATH
+
     const tvShutoffSound = new Audio('./assets/sounds/tv-shutoff.mp3');
     const tvStaticSound = new Audio('./assets/sounds/tv-static.mp3');
-    // Preload sounds that need quick response (optional but good practice)
     tvShutoffSound.preload = 'auto';
     tvStaticSound.preload = 'auto';
 
     // --- Create Audio Controls Dynamically ---
-    // Create elements for audio controls programmatically
     const audioControlContainer = document.createElement('div');
     audioControlContainer.id = 'audio-control-container';
     const songNameDisplay = document.createElement('div');
     songNameDisplay.id = 'song-name';
-    songNameDisplay.textContent = "---"; // Default text until audio loads
+    songNameDisplay.textContent = "---";
     const volumeContainer = document.createElement('div');
-    volumeContainer.id = 'volume-container'; // Container for the slider
+    volumeContainer.id = 'volume-container';
     const volumeSlider = document.createElement('input');
-    volumeSlider.type = 'range'; volumeSlider.min = 0; volumeSlider.max = 100; volumeSlider.value = 25; // Default volume 25%
+    volumeSlider.type = 'range'; volumeSlider.min = 0; volumeSlider.max = 100; volumeSlider.value = 25;
     volumeSlider.id = 'volume-slider';
     const muteButton = document.createElement('button');
     muteButton.id = 'mute-button';
     muteButton.classList.add('audio-button');
-    // Set initial icon based on the initial 'isMuted' state
-    muteButton.textContent = isMuted ? '🔇' : '🔊';
-    const raveModeButton = document.createElement('button');
-    raveModeButton.textContent = '🎉'; // Rave mode toggle icon
-    raveModeButton.classList.add('audio-button');
+    muteButton.textContent = isMuted ? '🔇' : '🔊'; // Initial icon based on state
+    const modeButton = document.createElement('button'); // Renamed from raveModeButton
+    modeButton.id = 'mode-button'; // Give it an ID if needed
+    modeButton.classList.add('audio-button');
+    // Initial icon for mode button (indicates clicking it will go to 'rave')
+    modeButton.textContent = '🎉';
 
     // Assemble the controls
-    volumeContainer.appendChild(volumeSlider); // Put slider inside its container
-    audioControlContainer.appendChild(songNameDisplay); // Add song name display
-    audioControlContainer.appendChild(volumeContainer); // Add slider container
-    audioControlContainer.appendChild(muteButton);      // Add mute button
-    audioControlContainer.appendChild(raveModeButton);  // Add rave button
-    // Note: audioControlContainer is appended to the body later in initAudio()
+    volumeContainer.appendChild(volumeSlider);
+    audioControlContainer.appendChild(songNameDisplay);
+    audioControlContainer.appendChild(volumeContainer);
+    audioControlContainer.appendChild(muteButton);
+    audioControlContainer.appendChild(modeButton); // Add the mode cycle button
 
     // --- Audio Utility Functions ---
-
-    /**
-     * Updates the song name display based on the currently playing audio element.
-     * @param {HTMLAudioElement} audioElement - The audio element whose name should be displayed.
-     */
-    function updateSongName(audioElement) {
-        if (!audioElement || !songNameDisplay) return; // Safety check
+    function updateSongName(audioElement) { /* ... (Keep code from previous complete version) ... */
+        if (!audioElement || !songNameDisplay) return;
         try {
-            // Check if src is valid before trying to parse
             if (!audioElement.src || !audioElement.src.includes('/') || audioElement.src.endsWith('/')) {
                 songNameDisplay.textContent = "Loading...";
                 const updateOnLoad = () => updateSongName(audioElement);
@@ -97,96 +87,57 @@ document.addEventListener('DOMContentLoaded', () => {
                 .replace(/\.(mp3|wav|ogg)$/i, '').replace(/_/g, ' ').replace(/-/g, ' - ')
                 .replace(/ {2,}/g,' ').replace(/\(.*?\)/g, '').trim();
             songNameDisplay.textContent = decodedName || "---";
-        } catch (e) {
-            console.error("Error parsing/updating song name:", e);
-            songNameDisplay.textContent = "Error";
-        }
+        } catch (e) { console.error("Error parsing/updating song name:", e); songNameDisplay.textContent = "Error"; }
     }
 
-    /**
-     * Sets the volume for all relevant audio elements.
-     * @param {number|string} volumeValue - Volume level from 0 to 100.
-     */
     function setVolume(volumeValue) {
-        const volume = parseFloat(volumeValue) / 100; // Convert 0-100 range to 0.0-1.0
+        const volume = parseFloat(volumeValue) / 100;
         backgroundMusic.volume = volume;
         raveMusic.volume = volume;
+        technoMusic.volume = volume; // Apply to techno track too
         console.log("Volume set to:", volumeValue);
     }
 
-    /**
-     * Initial setup common to all audio elements (looping, initial volume).
-     */
     function setupAudio() {
         backgroundMusic.loop = true;
         raveMusic.loop = true;
-        setVolume(volumeSlider.value); // Set initial volume
+        technoMusic.loop = true; // Loop techno track
+        setVolume(volumeSlider.value); // Set initial volume for all
     }
 
     // --- Function to Initialize Audio on User Interaction ---
-    /**
-     * Called once after the first user interaction (or attempted on hover)
-     * to enable audio playback and add audio controls to the page.
-     */
-    function initAudio() {
-        if (audioInitialized) return; // Run only once
-        audioInitialized = true; // Set flag immediately
+    function initAudio() { /* ... (Keep code from previous complete version, it's already safe) ... */
+        if (audioInitialized) return;
+        audioInitialized = true;
         console.log("Running initAudio()...");
-
-        // Remove the "Click to enable" prompt if it exists
         const currentAudioPrompt = document.getElementById('audio-prompt');
-        if (currentAudioPrompt) {
-            currentAudioPrompt.remove();
-        } else {
-            // Warning moved to initial load check, less noise here.
-        }
-
-        // Add the dynamically created audio controls to the page body
-        // Check if not already appended (safety for multiple calls, though flag should prevent)
+        if (currentAudioPrompt) { currentAudioPrompt.remove(); }
         if (!document.getElementById('audio-control-container')) {
             document.body.appendChild(audioControlContainer);
         }
-
-        // Perform initial audio setup (volume, looping)
         setupAudio();
-
-        // --- Try playing the initial background music ---
-        // NOTE: This .play() call will likely fail if initAudio was triggered
-        // solely by HOVER before any click/tap occurred, due to browser policy.
         console.log("Attempting backgroundMusic.play() inside initAudio...");
         backgroundMusic.play()
             .then(() => {
-                // This 'then' block likely only runs if initAudio was triggered by a click/tap.
                 console.log("Background music playing started successfully.");
-                updateSongName(backgroundMusic); // Update display
+                updateSongName(backgroundMusic);
             })
             .catch(error => {
-                // This 'catch' block WILL likely run if initAudio was triggered by hover first.
                 console.warn(`Background music play() failed inside initAudio (Error: ${error.name}). This is expected if triggered by hover before user click/tap.`);
-                if (songNameDisplay) songNameDisplay.textContent = "Audio Paused"; // Indicate inactive state
+                if (songNameDisplay) songNameDisplay.textContent = "Audio Paused";
             });
-    }
+     }
 
     // --- Autoplay Fix: Require User Interaction (Reliable Method) ---
-    /**
-     * Handler for the first *reliable* user interaction (click, touch, keydown).
-     * Calls initAudio() if it hasn't run successfully yet.
-     */
-    function interactionHandler() {
-        // Call initAudio only if the flag isn't set. It's safe to call multiple times
-        // as initAudio itself checks the flag.
+    function interactionHandler() { /* ... (Keep code from previous complete version) ... */
         if (!audioInitialized) {
             console.log("User interaction (click/tap/key) detected, ensuring audio initialization.");
             initAudio();
         }
-        // Listeners with {once: true} remove themselves automatically.
     }
-
-    // Add listeners for the *first* reliable interaction.
     document.addEventListener('click', interactionHandler, { once: true });
     document.addEventListener('touchstart', interactionHandler, { once: true });
     document.addEventListener('keydown', interactionHandler, { once: true });
-    // Also listen specifically on the prompt itself.
     const initialAudioPrompt = document.getElementById('audio-prompt');
     if (initialAudioPrompt) {
         initialAudioPrompt.addEventListener('click', interactionHandler, { once: true });
@@ -194,137 +145,136 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Audio Control Interactions ---
 
-    // Volume Slider Interaction
-    if (volumeSlider) {
-        volumeSlider.addEventListener('input', (e) => {
-            setVolume(e.target.value);
-        });
-    }
+    if (volumeSlider) { volumeSlider.addEventListener('input', (e) => { setVolume(e.target.value); }); }
 
-    // --- Mute Button & Volume Slider Visibility (LOGIC: Click 1: Show, Click 2: Mute) ---
-    // Function to explicitly hide the slider
-    function hideVolumeSlider() {
-        if (isVolumeSliderVisible && volumeContainer) {
-            volumeContainer.style.display = 'none';
-            isVolumeSliderVisible = false;
-        }
+    // Mute Button & Volume Slider Visibility (LOGIC: Click 1: Show, Click 2: Mute)
+    function hideVolumeSlider() { /* ... (Keep code from previous complete version) ... */
+         if (isVolumeSliderVisible && volumeContainer) { volumeContainer.style.display = 'none'; isVolumeSliderVisible = false; }
     }
-    // Function to explicitly show the slider
-    function showVolumeSlider() {
-        if (!isVolumeSliderVisible && volumeContainer) {
-            volumeContainer.style.display = 'block';
-            isVolumeSliderVisible = true;
-        }
+    function showVolumeSlider() { /* ... (Keep code from previous complete version) ... */
+        if (!isVolumeSliderVisible && volumeContainer) { volumeContainer.style.display = 'block'; isVolumeSliderVisible = true; }
     }
 
     if (muteButton) {
-        // Ensure the initial icon reflects the starting mute state
-        muteButton.textContent = isMuted ? '🔇' : '🔊';
-
+        muteButton.textContent = isMuted ? '🔇' : '🔊'; // Set initial icon
         muteButton.addEventListener('click', () => {
-            // Ensure audio context has been attempted (important if mute is the *very first* interaction)
             if (!audioInitialized) initAudio();
-
             if (isVolumeSliderVisible) {
                 // --- SECOND+ CLICK LOGIC (Slider is already visible) ---
-                isMuted = !isMuted; // Toggle the state variable
-                backgroundMusic.muted = isMuted; // Apply mute state
+                isMuted = !isMuted; // Toggle mute state
+                backgroundMusic.muted = isMuted; // Apply to all music tracks
                 raveMusic.muted = isMuted;
-                muteButton.textContent = isMuted ? '🔇' : '🔊'; // Update the icon
+                technoMusic.muted = isMuted;
+                muteButton.textContent = isMuted ? '🔇' : '🔊'; // Update icon
                 console.log("Music Muted Toggled:", isMuted);
-                // Slider remains visible.
             } else {
                 // --- FIRST CLICK LOGIC (Slider is hidden) ---
                 showVolumeSlider(); // ONLY show the slider.
                 console.log("Volume slider shown on first click.");
-                // Mute state and icon are NOT changed by this action.
             }
         });
     }
 
-    // Add listeners to hide volume slider ONLY if user clicks/taps outside the controls
-    document.addEventListener('click', (event) => {
-        if (isVolumeSliderVisible &&
-            muteButton && !muteButton.contains(event.target) &&
-            volumeContainer && !volumeContainer.contains(event.target)) {
-            hideVolumeSlider();
-        }
+    // Click Outside Listener (Hides volume slider)
+    document.addEventListener('click', (event) => { /* ... (Keep code from previous complete version) ... */
+         if (isVolumeSliderVisible && muteButton && !muteButton.contains(event.target) && volumeContainer && !volumeContainer.contains(event.target)) { hideVolumeSlider(); }
     });
-    document.addEventListener('touchstart', (event) => {
-        if (isVolumeSliderVisible &&
-            muteButton && !muteButton.contains(event.target) &&
-            volumeContainer && !volumeContainer.contains(event.target)) {
-            hideVolumeSlider();
-        }
+    document.addEventListener('touchstart', (event) => { /* ... (Keep code from previous complete version) ... */
+        if (isVolumeSliderVisible && muteButton && !muteButton.contains(event.target) && volumeContainer && !volumeContainer.contains(event.target)) { hideVolumeSlider(); }
     }, { passive: true });
 
 
-    // Rave Mode Button Interaction
-    if (raveModeButton) {
-        raveModeButton.addEventListener('click', () => {
-            if (!audioInitialized) initAudio();
-            isRaveMode = !isRaveMode;
-            console.log("Rave Mode Toggled:", isRaveMode);
-            let targetMusic = isRaveMode ? raveMusic : backgroundMusic;
-            let otherMusic = isRaveMode ? backgroundMusic : raveMusic;
-            otherMusic.pause();
-            if (!isMuted) {
-                targetMusic.play().catch(e => console.error(`Error playing ${isRaveMode ? 'rave' : 'background'} music:`, e));
+    // === Mode Cycle Button Interaction (NEW LOGIC) ===
+    if (modeButton) {
+        modeButton.addEventListener('click', () => {
+            if (!audioInitialized) initAudio(); // Ensure audio is ready
+
+            let nextMode = 'normal'; // Default to normal if something goes wrong
+            let nextIcon = '🎉';
+            let musicToPlay = backgroundMusic;
+            let musicToPause = [raveMusic, technoMusic];
+
+            // Determine next state based on current state
+            if (currentMode === 'normal') {
+                nextMode = 'rave';
+                nextIcon = '🪩'; // Icon indicates clicking again goes to Techno
+                musicToPlay = raveMusic;
+                musicToPause = [backgroundMusic, technoMusic];
+            } else if (currentMode === 'rave') {
+                nextMode = 'techno';
+                nextIcon = '🎵'; // Icon indicates clicking again goes to Normal
+                musicToPlay = technoMusic;
+                musicToPause = [backgroundMusic, raveMusic];
+            } else if (currentMode === 'techno') {
+                nextMode = 'normal';
+                nextIcon = '🎉'; // Icon indicates clicking again goes to Rave
+                musicToPlay = backgroundMusic;
+                musicToPause = [raveMusic, technoMusic];
             }
-            updateSongName(targetMusic);
+
+            // Update the mode state
+            currentMode = nextMode;
+            console.log("Mode changed to:", currentMode);
+
+            // Update button icon
+            modeButton.textContent = nextIcon;
+
+            // Pause other tracks first
+            musicToPause.forEach(audio => audio.pause());
+
+            // Play the target track only if music isn't muted globally
+            if (!isMuted) {
+                musicToPlay.play().catch(e => console.error(`Error playing ${currentMode} music:`, e));
+            } else {
+                // If muted, ensure the target track is ready but paused
+                 musicToPlay.pause(); // Ensure it's paused if muted
+                 // Alternatively, let it play muted:
+                 // musicToPlay.play().catch(e => console.error(...)); musicToPlay.muted = true;
+            }
+
+            // Update the displayed song name
+            updateSongName(musicToPlay);
+
+            // --- Dispatch state change event for the background ---
             document.dispatchEvent(new CustomEvent('background-state-change', {
-                detail: { state: isRaveMode ? 'enhanced' : 'normal' }
+                detail: { state: currentMode } // Send 'normal', 'rave', or 'techno'
             }));
         });
     }
 
-    // --- Hell Button Interactions (MODIFIED MOUSEENTER) ---
+    // --- Hell Button Interactions ---
     if (hellButton) {
-        // MODIFIED: Attempt to init audio and play static sound on hover
-        hellButton.addEventListener('mouseenter', () => {
-            // --- Attempt to initialize audio context on hover ---
-            // This will run setup, but browser policy likely prevents audible .play()
-            // calls initiated by hover alone until a click/tap occurs somewhere.
-            if (!audioInitialized) {
-                 console.log("Hover detected on Hell Button, attempting initAudio...");
-            }
-            initAudio(); // Call initAudio - it handles the 'audioInitialized' flag internally
-
-            // --- Attempt to play static sound ---
-            // Play only if initAudio has run at least once.
-            // The browser might STILL block this play() until a click/tap gesture.
-            if (audioInitialized && tvStaticSound) {
-                tvStaticSound.currentTime = 0; // Rewind
-                tvStaticSound.play().catch(e => {
-                    // Catch the likely NotAllowedError silently or log for debugging
-                    console.warn(`Static sound play() on hover failed or was blocked (Error: ${e.name}). This is expected before the first click/tap.`);
-                });
-            }
+        // Attempt init on hover
+        hellButton.addEventListener('mouseenter', () => { /* ... (Keep code from previous complete version) ... */
+             if (!audioInitialized) { console.log("Hover on Hell Button, attempting initAudio..."); }
+             initAudio();
+             if (audioInitialized && tvStaticSound) {
+                tvStaticSound.currentTime = 0;
+                tvStaticSound.play().catch(e => { console.warn(`Static sound play() on hover failed/blocked (Error: ${e.name}). Expected before first click/tap.`); });
+             }
         });
-
-        // Pause static sound when mouse leaves
-        hellButton.addEventListener('mouseleave', () => {
+        hellButton.addEventListener('mouseleave', () => { /* ... (Keep code from previous complete version) ... */
              if (tvStaticSound) tvStaticSound.pause();
         });
 
-        // Handle click on the Hell Button (Transition)
-        hellButton.addEventListener('click', (e) => {
-            e.preventDefault(); // Prevent default link navigation immediately
-            if (!audioInitialized) initAudio(); // Ensure initialized if click is first interaction
-
+        // Handle click (Transition)
+        hellButton.addEventListener('click', (e) => { /* ... (Keep code from previous complete version, BUT update pause logic) ... */
+            e.preventDefault();
+            if (!audioInitialized) initAudio();
             console.log('Hell Button Clicked - Triggering Transition');
             hellButton.classList.add('clicked');
             setTimeout(() => { hellButton.classList.remove('clicked'); }, 150);
 
-            // Stop other sounds/music
+            // Stop ALL sounds/music (including techno)
             try {
                 tvStaticSound.pause(); tvStaticSound.currentTime = 0;
                 backgroundMusic.pause();
                 raveMusic.pause();
-                console.log("Other sounds/music paused for transition.");
+                technoMusic.pause(); // Pause techno track too
+                console.log("All sounds/music paused for transition.");
             } catch (err) { console.error("Error pausing sounds:", err); }
 
-            // Play TV Shutoff Sound (should work if audioInitialized is true)
+            // Play TV Shutoff Sound
             if (audioInitialized && tvShutoffSound) {
                 console.log("Attempting to play TV Shutoff Sound...");
                 tvShutoffSound.currentTime = 0;
@@ -335,12 +285,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Trigger Visual TV Shutdown Transition
             if (tvShutdownOverlay) {
-                void tvShutdownOverlay.offsetWidth; // Force reflow for transition
+                void tvShutdownOverlay.offsetWidth;
                 tvShutdownOverlay.classList.add('active');
                 console.log("TV Shutdown class added.");
-            } else {
-                console.error("TV Shutdown Overlay element not found!");
-            }
+            } else { console.error("TV Shutdown Overlay element not found!"); }
 
             // Navigate After Transition Delay
             const navigationDelay = 350;
@@ -354,12 +302,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- Pokéball Interaction (If Applicable) ---
-    if (horrorBallWrapper && horrorBall) {
+    if (horrorBallWrapper && horrorBall) { /* ... (Keep code from previous complete version) ... */
         horrorBallWrapper.addEventListener('click', () => {
             if (horrorBall) {
-                horrorBall.classList.remove('shake');
-                void horrorBall.offsetWidth; // Force reflow
-                horrorBall.classList.add('shake');
+                horrorBall.classList.remove('shake'); void horrorBall.offsetWidth; horrorBall.classList.add('shake');
                 console.log("Pokeball clicked, shake animation applied.");
             }
         });
