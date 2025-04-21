@@ -9,14 +9,16 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Pirata+One&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
     <link rel="stylesheet" href="assets/css/main.css">
     <link rel="stylesheet" href="assets/css/theme.css">
-</head>
-<body class="bg-black text-gray-300">
-    <!-- Background Container -->
-    <div id="threejs-bg"></div>
+    <link rel="stylesheet" href="assets/css/audio.css"> </head>
+<body class="text-gray-300"> <div id="threejs-bg"></div>
 
-    <!-- Main Content Container -->
+    <div id="tv-shutdown-overlay"></div>
+
+    <div id="audio-prompt">Click anywhere to enable audio</div>
+
     <div id="top-ui-container">
         <h1 class="font-pirata text-red-600 text-center title-glow">
             Envoy's Realm
@@ -26,15 +28,12 @@
             <div class="horror-ball"></div>
         </div>
 
-        <a href="#homepage" id="hell-button" class="hell-button font-pirata rounded-lg shadow-lg text-center block">
+        <a href="homepage.html" id="hell-button" class="hell-button font-pirata rounded-lg shadow-lg text-center block">
             Welcome to Hell
         </a>
     </div>
 
-    <!-- Background Script -->
     <script src="assets/js/background.js"></script>
-    
-    <!-- Main Content Interaction Script -->
     <script src="assets/js/interactions.js"></script>
 </body>
 </html>
