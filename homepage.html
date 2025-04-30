@@ -3,31 +3,147 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Envoy's Realm - Homepage</title>
+    <title>Envoy's Links</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Pirata+One&family=Asap:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <script src="assets/js/audio_player.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <style>
+        /* Minimal base styles adapted from your main.css */
+        .font-pirata { font-family: 'Pirata One', cursive; }
         body {
-            background: #111;
-            color: white;
-            font-family: 'Arial', sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
+            overflow-x: hidden; /* Prevent horizontal scroll from carousel */
+            overflow-y: auto; /* Allow vertical scroll if content exceeds height */
+            position: relative;
+            width: 100vw;
+            min-height: 100vh;
+            background: #000000; /* Base black */
             margin: 0;
-            overflow: hidden;
+            padding: 0;
+            cursor: default;
+            color: #d1d5db; /* Default text color (text-gray-300) */
+            font-family: 'Asap', sans-serif; /* Default font */
         }
-        .content {
+        #threejs-bg {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -10; overflow: hidden;
+        }
+        #threejs-bg canvas { display: block; }
+        .title-glow {
+            font-size: 5rem; /* Adjusted size */
+            line-height: 1;
+            text-shadow: 0 0 5px rgba(255, 100, 100, 0.8), 0 0 10px rgba(255, 0, 0, 0.7), 0 0 18px rgba(138, 43, 226, 0.6), 0 0 25px rgba(75, 0, 130, 0.5);
+            z-index: 1;
+            animation: text-flicker 3s linear infinite alternate;
+            color: #dc2626; /* text-red-600 */
             text-align: center;
-            max-width: 600px;
-            padding: 2rem;
+            white-space: nowrap;
+        }
+        @keyframes text-flicker { /* Keep your flicker animation */
+            0%, 10%, 12%, 20%, 22%, 30%, 32%, 40%, 42%, 50%, 52%, 60%, 62%, 70%, 72%, 80%, 82%, 90%, 92%, 100% {
+                text-shadow: 0 0 5px rgba(255, 100, 100, 0.8), 0 0 10px rgba(255, 0, 0, 0.7), 0 0 18px rgba(138, 43, 226, 0.6), 0 0 25px rgba(75, 0, 130, 0.5);
+                opacity: 1;
+            }
+            11%, 21%, 31%, 41%, 51%, 61%, 71%, 81%, 91% {
+                text-shadow: 0 0 4px rgba(255, 100, 100, 0.6), 0 0 8px rgba(255, 0, 0, 0.5), 0 0 15px rgba(138, 43, 226, 0.4), 0 0 20px rgba(75, 0, 130, 0.3);
+                opacity: 0.95;
+            }
+        }
+        @media (max-width: 768px) {
+            .title-glow { font-size: 3rem; }
+        }
+        /* Simple button style */
+        .menu-toggle-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1001; /* Above menu */
+            padding: 8px 12px;
+            background-color: rgba(138, 43, 226, 0.5); /* Purple */
+            color: #eee;
+            border: 1px solid rgba(220, 38, 38, 0.7); /* Red border */
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: 'Asap', sans-serif;
+            font-size: 1rem;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 0 8px rgba(138, 43, 226, 0.6);
+        }
+        .menu-toggle-button:hover {
+            background-color: rgba(138, 43, 226, 0.7);
+            box-shadow: 0 0 15px rgba(220, 38, 38, 0.8);
         }
     </style>
+    <link rel="stylesheet" href="assets/css/links_style.css">
 </head>
-<body>
-    <div class="content">
-        <h1 class="text-4xl mb-4">Welcome to Envoy's Realm</h1>
-        <p class="text-xl">Your journey begins...</p>
-    </div>
+<body class="bg-black text-gray-300">
+
+    <div id="threejs-bg"></div>
+
+    <div class="cursor-light"></div>
+
+    <button id="menu-toggle" class="menu-toggle-button">
+        Menu
+    </button>
+
+    <aside id="menu" class=""> <span class="shine shine-top"></span>
+        <span class="shine shine-bottom"></span>
+        <span class="glow glow-top"></span>
+        <span class="glow glow-bottom"></span>
+        <span class="glow glow-bright glow-top"></span>
+        <span class="glow glow-bright glow-bottom"></span>
+
+        <div class="inner">
+            <label>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+                </svg>
+                <input type="text" placeholder="Search projects..." />
+            </label>
+
+            <section>
+                <header>Projects</header>
+                <ul id="menu-project-list">
+                    <li class="text-gray-500 italic p-2">Loading projects...</li>
+                </ul>
+            </section>
+
+            <hr> <section>
+                <header>Navigation</header>
+                <ul>
+                    <li>
+                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5"> <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" /> </svg>
+                        <a href="index.html">Landing Page</a> </li>
+                    <li>
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5"> <path stroke-linecap="round" stroke-linejoin="round" d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" /> </svg>
+                        <a href="#">About Me (Example)</a> </li>
+                     <li>
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" /></svg>
+                        <a href="#">Contact (Example)</a> </li>
+                </ul>
+            </section>
+        </div>
+    </aside>
+
+    <main class="relative pt-24 pb-16 px-4 md:px-8 lg:px-16 z-0"> <h1 class="font-pirata text-red-600 text-center title-glow mb-16">
+            Project Directory
+        </h1>
+
+        <div class="carousel-container relative w-full h-[550px] flex items-center justify-center">
+            <div class="cards-wrapper">
+                <div class="cards-container">
+                    <div class="text-center text-gray-400 p-10">Loading projects...</div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <script src="assets/js/background.js"></script>
+
+    <script src="assets/js/links_page.js"></script>
+
 </body>
 </html>
