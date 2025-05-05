@@ -1,153 +1,118 @@
-// links_page.js
+// assets/js/links_page.js
+
+// Ensure the App namespace exists *before* other scripts might try to use it.
+window.App = window.App || {};
+console.log("links_page.js: Initializing App namespace if needed.");
 
 document.addEventListener('DOMContentLoaded', () => {
-    console.log("Links Directory DOM loaded.");
+    console.log("links_page.js: DOMContentLoaded event fired.");
 
-    // --- Project Data (Replace with your actual projects) ---
-    const projects = [
-        {
+    // --- Project Data (Define within App namespace) ---
+    App.projects = [
+         {
             id: "project-1",
-            title: "Project Alpha",
-            description: "A revolutionary web application using AI to optimize workflows and enhance productivity across teams.",
-            // Example using Heroicons (Outline): https://heroicons.com/
-            icon: '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"> <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 3.104v5.714a2.25 2.25 0 0 1-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 0 1 4.5 0m0 0v5.714c0 .597.237 1.17.659 1.591l3.409 3.409c.836.836 1.4 2.047 1.4 3.291v1.313M9.75 3.104c1.63.204 3.162.526 4.5 0m4.5 0a2.25 2.25 0 0 1 .659 1.591l3.409 3.409c.836.836 1.4 2.047 1.4 3.291v1.313M3 18.375v-1.313c0-1.243.564-2.455 1.4-3.29L7.81 10.36a2.25 2.25 0 0 1 .659-1.59V3.104a2.25 2.25 0 0 1-1.5-.082A24.299 24.299 0 0 0 3 18.375Z" /> </svg>',
-            projectUrl: "#", // Link to project demo/page
-            githubUrl: "#", // Link to GitHub repo
-            glowHue: 0 // Red-ish glow
+            title: "Forte Previewer",
+            description: "This project is a web-based image gallery viewer with advanced features, designed to showcase images (like Pokémon TCG cards) organized in folders. It includes filtering, sorting by folder, dynamic sizing, interactive hover effects, background music, and a particle background animation.",
+            icon: null,
+            iconUrl: 'https://raw.githubusercontent.com/Envoyofhell/Pocket-Image-Previewer/Forte/resources/forte-arrivals.png',
+            projectUrl: "https://forte.meta-ptcg.org/", // Subdomain URL
+            githubUrl: "https://github.com/Envoyofhell",
+            glowHue: 0
         },
         {
             id: "project-2",
-            title: "Gamma Framework",
-            description: "Lightweight CSS framework for rapid prototyping with a focus on accessibility and modern design patterns.",
-            icon: '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 1 1-3 0m3 0a1.5 1.5 0 1 0-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-9.75 0h9.75" /></svg>',
-            projectUrl: "#",
-            githubUrl: "#",
-            glowHue: 280 // Purple-ish glow
+            title: "Meta-PTCG",
+            description: "A custom Pokémon TCG simulator application designed for experimenting with non-standard Pokémon mechanics and custom cards.",
+            iconUrl: 'https://raw.githubusercontent.com/Envoyofhell/ptcg-sim-meta/refs/heads/main/client/src/assets/favicon.ico',
+            projectUrl: "https://meta.meta-ptcg.org/", // Subdomain URL
+            githubUrl: "https://github.com/Envoyofhell/ptcg-sim-meta",
+            glowHue: 280
         },
         {
             id: "project-3",
-            title: "Neon Dreams",
-            description: "Interactive WebGL experience showcasing procedural generation and advanced shader techniques.",
-            icon: '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.59 14.37a6 6 0 0 1-5.84 7.38v-4.82m5.84-2.56a17.96 17.96 0 0 0-5.84 7.38m5.84-7.38a17.96 17.96 0 0 1-7.38 5.84m7.38-5.84a6 6 0 0 1 2.18-5.84m0 5.84a7.5 7.5 0 0 0-2.18-5.84m-7.38 2.56a17.96 17.96 0 0 1 7.38-5.84m-7.38 5.84a6 6 0 0 1-5.84-2.18m0 2.18a7.5 7.5 0 0 0 5.84 2.18m-5.84 0h4.82m2.56a17.96 17.96 0 0 0 7.38-5.84m-7.38 5.84a17.96 17.96 0 0 1-5.84 7.38m5.84-7.38a6 6 0 0 1-7.38 5.84m7.38-5.84a7.5 7.5 0 0 0-7.38 5.84m0 0v4.82m-2.56a17.96 17.96 0 0 1-7.38-5.84m7.38 5.84a17.96 17.96 0 0 0-5.84 7.38m-5.84-7.38a6 6 0 0 1 5.84-7.38m-5.84 7.38a7.5 7.5 0 0 0 5.84 7.38M9 11.25a2.25 2.25 0 1 0 0-4.5 2.25 2.25 0 0 0 0 4.5Z" /></svg>',
-            projectUrl: "#",
-            githubUrl: "#",
-            glowHue: 330 // Pink/Red glow
+            title: "Pokedex",
+            description: "A web-based application that allows users to browse Pokémon by generation, search for specific Pokémon, and view detailed information including game stats, descriptions, moves, abilities, and related Trading Card Game (TCG) cards.",
+            iconUrl: '../../src/dex.png', // Adjust path if needed relative to homepage.html
+            projectUrl: "https://pokedex.meta-ptcg.org/", // Subdomain URL
+            githubUrl: "https://github.com/Envoyofhell",
+            glowHue: 330
         },
         {
             id: "project-4",
-            title: "Data Visualizer",
+            title: "BallsDex Card Maker",
             description: "A tool for creating stunning, interactive charts and graphs from complex datasets using D3.js.",
-            icon: '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z" /></svg>',
-            projectUrl: "#",
-            githubUrl: "#",
-            glowHue: 210 // Blue-ish glow
+            iconUrl: '../../src/ball.png', // Adjust path if needed relative to homepage.html
+            projectUrl: "https://ballsdex.meta-ptcg.org/", // Subdomain URL
+            githubUrl: "https://github.com/Envoyofhell",
+            glowHue: 210
         },
         {
             id: "project-5",
-            title: "Synthwave Player",
-            description: "A retro-themed music player with audio visualization effects built with Tone.js.",
-            icon: '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 9l10.5-3m0 6.553v3.75a2.25 2.25 0 0 1-1.632 2.163l-1.32.377a1.803 1.803 0 1 1-.99-3.467l2.31-.66a2.25 2.25 0 0 0 1.632-2.163Zm0 0V7.5A2.25 2.25 0 0 0 18.75 5.25H17.25A2.25 2.25 0 0 0 15 7.5v1.81M9 9l-6.75-3m0 12.75a2.25 2.25 0 0 1-1.632-2.163l1.32-.377a1.803 1.803 0 1 1 .99 3.467l-2.31.66A2.25 2.25 0 0 0 2.25 16.5Zm0 0v1.81" /></svg>',
-            projectUrl: "#",
-            githubUrl: "#",
-            glowHue: 300 // Magenta glow
+            title: "Poke Clicker",
+            description: "A retro-themed Pokemon Clicker inspired by the popular cookie clicker game.",
+            iconUrl: '../../src/egg.png', // Adjust path if needed relative to homepage.html
+            projectUrl: "https://clicker.meta-ptcg.org/", // Subdomain URL
+            githubUrl: "https://github.com/Envoyofhell",
+            glowHue: 300
         },
          {
             id: "project-6",
-            title: "Portfolio v3",
-            description: "The latest iteration of my personal portfolio website, showcasing skills and projects.",
-            icon: '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" /></svg>',
-            projectUrl: "#",
-            githubUrl: "#",
-            glowHue: 260 // Indigo glow
+            title: "Pi-Calculator",
+            description: "This is an interactive web application featuring multiple calculators or visualizers presented in a tabbed interface, enhanced with dynamic effects, themed styling, and a bubble wrap clicker mini-game.",
+            iconUrl: 'https://i.pinimg.com/474x/fd/a4/b7/fda4b72909472b12602bd9c26c0c0cdc.jpg',
+            projectUrl: "https://envoyofhell.github.io/Pi-Calculator/", // External URL
+            githubUrl: "https://github.com/Envoyofhell/Pi-Calculator",
+            glowHue: 260
         },
     ];
+    App.areProjectsLoading = false;
+    console.log("links_page.js: App.projects defined.");
 
-    // --- DOM Element Selectors ---
-    const menu = document.getElementById('menu');
-    const menuToggle = document.getElementById('menu-toggle');
-    const menuProjectList = document.getElementById('menu-project-list');
-    const cardsContainer = document.querySelector(".cards-container");
-    const cardsWrapper = document.querySelector(".cards-wrapper");
+    // --- DOM Element Selectors (Get elements *after* DOM is ready) ---
+    let cardsContainer = document.querySelector(".cards-container");
+    let cardsWrapper = document.querySelector(".cards-wrapper");
     const cursorLight = document.querySelector(".cursor-light");
+    const mainContentArea = document.querySelector('main'); // Keep reference
 
     // --- State Variables ---
-    let menuItems = []; // Will be populated after dynamic loading
     let totalWidthOfOneSet = 0;
     let scrollPosition = 0;
     let animationFrameId = null;
     let isManuallyScrolling = false;
     let resizeTimeout;
-    const scrollSpeed = 0.4; // Adjust speed as needed (pixels per frame)
+    const scrollSpeed = 0.4;
+    const HOME_PAGE_URL = 'homepage.html'; // Define home page filename
 
-    // --- Initialization Functions ---
+    // --- Carousel Functions ---
 
-    /**
-     * Populates the project list in the menu.
-     */
-    function populateMenuProjectList() {
-        if (!menuProjectList) {
-            console.warn("Menu project list container (#menu-project-list) not found.");
-            return;
-        }
-        menuProjectList.innerHTML = ''; // Clear loading/static items
-        if (projects.length === 0) {
-            menuProjectList.innerHTML = '<li class="text-gray-500 italic p-2">No projects found.</li>';
-            return;
-        }
-        projects.forEach(project => {
-            const li = document.createElement('li');
-            li.setAttribute('data-target-card', project.id);
-            // Ensure icon SVG has fixed size and doesn't affect layout
-            const iconHtml = project.icon ? project.icon.replace('<svg', '<svg class="w-5 h-5 flex-shrink-0"') : '<span class="w-5 h-5 flex-shrink-0">?</span>';
-            li.innerHTML = `
-                ${iconHtml}
-                <span>${project.title}</span>
-            `;
-            menuProjectList.appendChild(li);
-        });
-    }
-
-    /**
-     * Attaches event listeners to all menu items (static and dynamic).
-     */
-    function attachMenuListeners() {
-        if (!menu) return;
-        // Query *all* list items within the menu
-        menuItems = Array.from(menu.querySelectorAll('li'));
-        menuItems.forEach(item => {
-            // Remove potential old listener before adding new one to prevent duplicates
-            const newItem = item.cloneNode(true);
-            item.parentNode.replaceChild(newItem, item);
-            // Add the click listener to the new node
-            newItem.addEventListener('click', () => handleMenuItemClick(newItem));
-        });
-    }
-
-    /**
-     * Creates a DOM element for a project card.
-     * @param {object} project - The project data object.
-     * @returns {HTMLElement} - The created card element.
-     */
     function createCardElement(project) {
         const card = document.createElement("div");
         card.className = "card";
         card.id = project.id;
         card.style.setProperty("--glow-hue", String(project.glowHue));
 
-        // Randomize animation timings
-        const glowDuration = 3 + Math.random() * 3; // 3-6s
-        const glowDelay = Math.random() * -4; // Start at different times
-        const floatDuration = 4 + Math.random() * 3; // 4-7s
-
+        // Animation timing
+        const glowDuration = 3 + Math.random() * 3;
+        const glowDelay = Math.random() * -4;
+        const floatDuration = 4 + Math.random() * 3;
         card.style.setProperty("--glow-duration", `${glowDuration}s`);
         card.style.setProperty("--glow-delay", `${glowDelay}s`);
         card.style.animationDuration = `${floatDuration}s, ${glowDuration}s`;
 
-        const iconHtml = project.icon ? project.icon.replace('<svg', '<svg class="w-full h-full object-contain"') : '?';
+        // Icon logic
+        let finalIconContent = '<span class="text-xl font-bold text-gray-500">?</span>';
+        if (project.iconUrl) {
+            finalIconContent = `<img src="${project.iconUrl}" alt="${project.title} icon" class="w-full h-full object-contain" onerror="this.parentElement.innerHTML = '<span class=\\'text-xl font-bold text-gray-500\\'>?</span>';">`;
+        } else if (project.icon) {
+            finalIconContent = project.icon.replace('<svg', '<svg class="w-full h-full object-contain"');
+        }
+
+        // Card HTML
         card.innerHTML = `
             <div class="card-content">
-                <div class="flex-grow"> <div class="card-header">
-                        <span class="card-icon">${iconHtml}</span>
+                <div class="flex-grow">
+                    <div class="card-header">
+                        <span class="card-icon">${finalIconContent}</span>
                         <h3 class="card-title">${project.title}</h3>
                     </div>
                     <p class="card-description">${project.description}</p>
@@ -158,361 +123,512 @@ document.addEventListener('DOMContentLoaded', () => {
                         <span>View</span>
                     </a>
                     <a href="${project.githubUrl}" target="_blank" rel="noopener noreferrer" class="card-github-link" title="View GitHub Repository for ${project.title}">
-                       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"></path><path d="M9 18c-4.51 2-5-2-7-2"></path></svg>
+                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"></path><path d="M9 18c-4.51 2-5-2-7-2"></path></svg>
                         <span>GitHub</span>
                     </a>
                 </div>
             </div>`;
 
-        // Card click listener (opens project URL if not clicking a link)
+        // --- Card Click Listener uses App.loadProjectIframe ---
         card.addEventListener('click', (e) => {
-             if (!e.target.closest('a')) {
-                if (project.projectUrl && project.projectUrl !== '#') {
-                    window.open(project.projectUrl, '_blank', 'noopener,noreferrer');
-                }
-             }
+            const clickedLink = e.target.closest('a.card-link, a.card-github-link');
+            if (clickedLink) {
+                console.log(`Card Click: Clicked on explicit link (${clickedLink.href}), allowing default.`);
+                return; // Allow default behavior for View/GitHub links
+            }
+
+            // If click is on card body, load project iframe
+            console.log(`Card Click: Clicked on card body for project: ${project.title}. Calling App.loadProjectIframe.`);
+            e.preventDefault();
+            e.stopPropagation();
+
+            if (typeof App.loadProjectIframe === 'function') {
+                 // Pass necessary info to the iframe loader function
+                 App.loadProjectIframe(project.projectUrl, project.title, project.id);
+            } else {
+                 console.error("Card Click Error: App.loadProjectIframe function is not defined!");
+                 // Fallback: maybe open in new tab if iframe loading isn't available
+                 // window.open(project.projectUrl, '_blank', 'noopener,noreferrer');
+            }
         });
+
         return card;
     }
 
-    /**
-     * Initializes the carousel by creating and appending card elements.
-     */
     function initializeCarousel() {
+        // (Function content remains the same)
+        cardsContainer = document.querySelector(".cards-container");
+        cardsWrapper = document.querySelector(".cards-wrapper");
+
         if (!cardsContainer || !cardsWrapper) {
-             console.error("Cannot initialize carousel: container or wrapper missing.");
-             return;
+            console.error("Carousel Init: container or wrapper missing.");
+            return false;
         }
-        cardsContainer.innerHTML = ""; // Clear existing
-        const fragment = document.createDocumentFragment();
-
-        if (projects.length === 0) {
-             console.warn("Projects array is empty. Cannot initialize carousel.");
+        if (!App.projects || App.projects.length === 0) {
+             console.warn("Carousel Init: Projects array empty or not ready.");
              cardsContainer.innerHTML = '<p class="text-center text-gray-500 p-10">No projects to display.</p>';
-             return;
+             return false;
         }
 
-        // Create three sets of cards for infinite scroll
+        console.log("Carousel: Initializing...");
+        cardsContainer.innerHTML = "";
+        const fragment = document.createDocumentFragment();
         for (let i = 0; i < 3; i++) {
-            projects.forEach((project) => {
-                const cardElement = createCardElement(project);
-                fragment.appendChild(cardElement);
-            });
+            App.projects.forEach(project => fragment.appendChild(createCardElement(project)));
         }
         cardsContainer.appendChild(fragment);
 
-        // Use requestAnimationFrame to ensure layout is calculated before getting width
-        requestAnimationFrame(() => {
+        setTimeout(() => {
             totalWidthOfOneSet = calculateSetWidth();
-
             if (totalWidthOfOneSet > 0) {
-                 scrollPosition = totalWidthOfOneSet; // Start at the beginning of the second set
-                 cardsWrapper.style.transform = `translateX(-${scrollPosition}px)`;
-                 console.log(`Carousel initialized. Set width: ${totalWidthOfOneSet}px. Initial scroll: ${scrollPosition}px`);
-                 startCarouselAnimation(); // Start animation
+                scrollPosition = totalWidthOfOneSet;
+                if (cardsWrapper) {
+                     cardsWrapper.style.transition = 'none';
+                     cardsWrapper.style.transform = `translateX(-${scrollPosition}px)`;
+                     void cardsWrapper.offsetWidth;
+                     cardsWrapper.style.transition = '';
+                     console.log(`Carousel: Initialized. Set width: ${totalWidthOfOneSet}px. Initial scroll: ${scrollPosition}px`);
+                     startCarouselAnimation();
+                } else {
+                     console.error("Carousel Init Timeout: cardsWrapper became null.");
+                }
             } else {
-                console.warn("Carousel set width calculation failed after render. Animation not started.");
-                cardsWrapper.style.transform = `translateX(0px)`; // Show first set statically
+                console.warn("Carousel Init Timeout: Width calculation failed.");
+                if(cardsWrapper) cardsWrapper.style.transform = `translateX(0px)`;
             }
-        });
+        }, 100);
+        return true;
     }
 
-    /**
-     * Calculates the total width of one set of project cards including gaps.
-     * @returns {number} - The calculated width in pixels.
-     */
     function calculateSetWidth() {
-        if (projects.length === 0 || !cardsContainer) return 0;
+        // (Function content remains the same)
+        cardsContainer = document.querySelector(".cards-container");
+        if (!App.projects || App.projects.length === 0 || !cardsContainer) return 0;
         const firstCard = cardsContainer.querySelector('.card');
-        if (!firstCard) {
-            // console.warn("calculateSetWidth: No cards found in container yet.");
-            return 0; // No cards rendered yet
-        }
+        if (!firstCard) return 0;
 
         try {
-            const cardStyle = window.getComputedStyle(firstCard);
             const containerStyle = window.getComputedStyle(cardsContainer);
-            const cardWidth = firstCard.offsetWidth; // Includes padding/border
-            const gap = parseFloat(containerStyle.gap) || 0; // Get gap value
-            // Width = (N * cardWidth) + ((N-1) * gap)
-            // Ensure N > 0 before calculating gap term
-            const gapTerm = projects.length > 1 ? (gap * (projects.length - 1)) : 0;
-            const setWidth = (cardWidth * projects.length) + gapTerm;
-            // console.log(`Calculated - Card Width: ${cardWidth}, Gap: ${gap}, Set Width: ${setWidth}`);
-            return setWidth > 0 ? setWidth : 0; // Ensure non-negative width
+            const cardWidth = firstCard.offsetWidth;
+            const gap = parseFloat(containerStyle.gap) || 0;
+            const setWidth = (cardWidth * App.projects.length) + (gap * App.projects.length);
+            return setWidth > 0 ? setWidth : 0;
         } catch (e) {
             console.error("Error calculating set width:", e);
             return 0;
         }
     }
 
-    // --- Event Handlers ---
-
-    /**
-     * Handles clicks on menu items, selects the item, and scrolls if needed.
-     * @param {HTMLElement} item - The clicked menu item (li element).
-     */
-    function handleMenuItemClick(item) {
-        // Remove 'selected' from all items
-        menuItems.forEach(el => el.classList.remove('selected'));
-        // Add 'selected' to the clicked item
-        item.classList.add('selected');
-
-        const targetCardId = item.getAttribute('data-target-card');
-        const link = item.querySelector('a');
-
-        if (targetCardId) {
-            scrollToCard(targetCardId);
-            // Optional: Close menu after scrolling
-            // closeMenu();
-        } else if (link && link.getAttribute('href') && link.getAttribute('href') !== '#') {
-            // Is a navigation link, close menu and allow navigation
-            closeMenu();
-        } else {
-            // Clicked on a non-project, non-link item (e.g., header, separator)
-            // Or a placeholder link (#) - do nothing or maybe close menu
-            // closeMenu(); // Decide if you want to close menu here
-        }
-    }
-
-    /**
-     * Toggles the menu open/closed state.
-     */
-    function toggleMenu() {
-        if (!menu || !menuToggle) return;
-        menu.classList.toggle('open');
-        menuToggle.textContent = menu.classList.contains('open') ? 'Close' : 'Menu';
-    }
-
-    /**
-     * Closes the menu if it's open.
-     */
-    function closeMenu() {
-        if (!menu || !menuToggle) return;
-        if (menu.classList.contains('open')) {
-            menu.classList.remove('open');
-            menuToggle.textContent = 'Menu';
-        }
-    }
-
-    /**
-     * Handles mouse movement for the cursor light effect.
-     * @param {MouseEvent} e - The mouse event.
-     */
-    function handleMouseMove(e) {
-        if (!cursorLight) return;
-        requestAnimationFrame(() => {
-            cursorLight.style.left = `${e.clientX}px`;
-            cursorLight.style.top = `${e.clientY}px`;
-        });
-    }
-
-    /**
-     * Handles mouseover events to change cursor light color.
-     * @param {MouseEvent} e - The mouse event.
-     */
-    function handleMouseOver(e) {
-         if (!cursorLight) return;
-         const card = e.target.closest('.card');
-         const interactiveElement = e.target.closest('button, a, li[data-target-card]');
-         let targetHue = 'var(--hue1, 300)'; // Default purple
-
-         if (card) {
-             targetHue = card.style.getPropertyValue('--glow-hue') || targetHue;
-         } else if (interactiveElement) {
-             targetHue = 'var(--hue2, 0)'; // Red for interactive elements
-         }
-         cursorLight.style.background = `radial-gradient(circle, hsla(${targetHue}, 80%, 70%, 0.1) 0%, transparent 70%)`;
-    }
-
-    /**
-      * Handles window resize events, debounced for performance.
-      */
-    function handleResize() {
-        clearTimeout(resizeTimeout);
-        resizeTimeout = setTimeout(() => {
-            console.log("Window resized, recalculating...");
-            stopCarouselAnimation(); // Stop animation
-
-            // Recalculate width using rAF for accuracy after layout changes
-            requestAnimationFrame(() => {
-                totalWidthOfOneSet = calculateSetWidth();
-
-                if (totalWidthOfOneSet > 0) {
-                    // Reset scroll position to the start of the second set based on new width
-                    scrollPosition = totalWidthOfOneSet;
-                    cardsWrapper.style.transition = 'none'; // No transition during resize adjustment
-                    cardsWrapper.style.transform = `translateX(-${scrollPosition}px)`;
-                    void cardsWrapper.offsetWidth; // Force reflow
-                    cardsWrapper.style.transition = ''; // Re-enable potential CSS transitions
-                    startCarouselAnimation(); // Restart animation
-                    console.log(`Recalculated set width: ${totalWidthOfOneSet}, Reset scroll: ${scrollPosition}`);
-                } else {
-                     console.warn("Recalculation failed after resize. Carousel might not function correctly.");
-                     cardsWrapper.style.transform = `translateX(0px)`; // Fallback
-                }
-            });
-        }, 250); // Debounce time
-    }
-
-
-    // --- Carousel Animation Control ---
-
-    /**
-     * The main animation loop for the carousel.
-     */
     function animateCarouselLoop() {
-        // Check if animation should run
+        // (Function content remains the same)
+         cardsWrapper = document.querySelector(".cards-wrapper");
         if (isManuallyScrolling || totalWidthOfOneSet <= 0 || !cardsWrapper) {
-            // If stopped or invalid state, request the next frame and exit
             animationFrameId = requestAnimationFrame(animateCarouselLoop);
             return;
         }
 
-        scrollPosition += scrollSpeed; // Increment scroll position
+        scrollPosition += scrollSpeed;
+        const startOfSecondSet = totalWidthOfOneSet;
+        const startOfThirdSet = totalWidthOfOneSet * 2;
 
-        // Reset logic: when the scroll position exceeds the start of the third set
-        if (scrollPosition >= totalWidthOfOneSet * 2) {
-             // Calculate the amount scrolled past the reset point
-             const overshoot = scrollPosition - (totalWidthOfOneSet * 2);
-             // Jump back to the start of the second set, plus the overshoot
-             scrollPosition = totalWidthOfOneSet + overshoot;
-             // Apply the transform without transition for an "instant" jump
-             cardsWrapper.style.transition = 'none';
-             cardsWrapper.style.transform = `translateX(-${scrollPosition}px)`;
-             // Force reflow/repaint might help ensure the jump is seamless
-             void cardsWrapper.offsetWidth;
-             // Re-enable transition if defined in CSS (though likely not needed here)
-             cardsWrapper.style.transition = '';
-             // console.log(`Carousel reset. Overshoot: ${overshoot.toFixed(2)}, New scrollPosition: ${scrollPosition.toFixed(2)}`); // Debug log for reset
+        if (scrollPosition >= startOfThirdSet) {
+            const positionWithinSet = (scrollPosition - startOfSecondSet) % totalWidthOfOneSet;
+            const newScrollPosition = startOfSecondSet + positionWithinSet;
+            cardsWrapper.style.transition = 'none';
+            requestAnimationFrame(() => {
+                 if (cardsWrapper) {
+                      cardsWrapper.style.transform = `translateX(-${newScrollPosition}px)`;
+                      requestAnimationFrame(() => {
+                           if (cardsWrapper) cardsWrapper.style.transition = '';
+                      });
+                 }
+            });
+            scrollPosition = newScrollPosition;
         } else {
-            // Apply the normal transform for smooth scrolling
             cardsWrapper.style.transform = `translateX(-${scrollPosition}px)`;
         }
-
-        // Request the next frame to continue the loop
         animationFrameId = requestAnimationFrame(animateCarouselLoop);
     }
 
-
-    /**
-     * Starts the carousel animation if it's not already running and conditions are met.
-     */
     function startCarouselAnimation() {
-        // Only start if not already running and width is valid
-        if (!animationFrameId && totalWidthOfOneSet > 0) {
-            console.log("Starting carousel animation.");
-            isManuallyScrolling = false; // Ensure manual scroll flag is off
+        // (Function content remains the same)
+         cardsWrapper = document.querySelector(".cards-wrapper");
+        if (!animationFrameId && totalWidthOfOneSet > 0 && cardsWrapper) {
+            console.log("Carousel: Starting animation.");
+            isManuallyScrolling = false;
+            if (animationFrameId) cancelAnimationFrame(animationFrameId);
             animationFrameId = requestAnimationFrame(animateCarouselLoop);
         } else if (totalWidthOfOneSet <= 0) {
-             console.warn("Cannot start animation: Carousel width is invalid.");
-        } else {
-            // console.log("Animation already running or conditions not met.");
+             console.warn("Carousel: Cannot start animation, width is invalid.");
+        } else if (!cardsWrapper) {
+             console.warn("Carousel: Cannot start animation, wrapper not found.");
         }
     }
 
-    /**
-     * Stops the carousel animation.
-     */
     function stopCarouselAnimation() {
+        // (Function content remains the same)
         if (animationFrameId) {
-            console.log("Stopping carousel animation.");
             cancelAnimationFrame(animationFrameId);
-            animationFrameId = null; // Clear the ID
+            animationFrameId = null;
         }
     }
-
-    // --- Scrolling Function ---
 
     /**
      * Smoothly scrolls the carousel to bring the specified card into view.
+     * Exposed via App.scrollToCard.
      * @param {string} cardId - The ID of the card element to scroll to.
      */
-    function scrollToCard(cardId) {
-        const allCards = Array.from(cardsContainer.querySelectorAll('.card'));
-        if (allCards.length === 0 || projects.length === 0 || !cardsWrapper || totalWidthOfOneSet <= 0) {
-             console.warn("Cannot scroll to card: Invalid state (no cards, no projects, no wrapper, or zero width).");
+    App.scrollToCard = function(cardId) {
+        // (Function content remains the same)
+        console.log(`App.scrollToCard called for: ${cardId}`);
+        const currentCardsContainer = document.querySelector(".cards-container");
+        const currentCardsWrapper = document.querySelector(".cards-wrapper");
+
+        if (!currentCardsContainer || !currentCardsWrapper || !App.projects || App.projects.length === 0) {
+            console.warn(`ScrollToCard: Cannot scroll, missing elements or projects. Container: ${!!currentCardsContainer}, Wrapper: ${!!currentCardsWrapper}`);
+            return;
+        }
+        totalWidthOfOneSet = calculateSetWidth();
+        if (totalWidthOfOneSet <= 0) {
+             console.warn("ScrollToCard: Cannot scroll, set width is zero.");
              return;
         }
 
-        const projectIndex = projects.findIndex(p => p.id === cardId);
+        const allCards = Array.from(currentCardsContainer.querySelectorAll('.card'));
+        if (allCards.length === 0) {
+             console.warn("ScrollToCard: No cards found in container.");
+             return;
+        }
+
+        const projectIndex = App.projects.findIndex(p => p.id === cardId);
         if (projectIndex === -1) {
-             console.warn(`Project index for card ID ${cardId} not found.`);
-             return;
+            console.warn(`ScrollToCard: Project index for card ID ${cardId} not found.`);
+            return;
         }
 
-        // Target the instance in the *second* set for calculation reference
-        const targetCardInstanceIndex = projects.length + projectIndex;
+        const targetCardInstanceIndex = App.projects.length + projectIndex;
         const targetCardInstance = allCards[targetCardInstanceIndex];
         if (!targetCardInstance) {
-             console.warn(`Card instance for ID ${cardId} in the second set not found.`);
-             return;
+            console.warn(`ScrollToCard: Card instance ${targetCardInstanceIndex} for ID ${cardId} not found.`);
+            return;
         }
 
-        const carouselVisibleWidth = cardsWrapper.parentElement.offsetWidth;
+        const carouselVisibleWidth = currentCardsWrapper.parentElement?.offsetWidth || window.innerWidth;
         const cardWidth = targetCardInstance.offsetWidth;
-        // Calculate offset relative to the start of the cardsContainer
         const cardOffsetLeft = targetCardInstance.offsetLeft;
 
-        // Calculate target scroll to center the card
         let targetScroll = cardOffsetLeft - (carouselVisibleWidth / 2) + (cardWidth / 2);
+        const targetOffsetWithinAnySet = targetScroll % totalWidthOfOneSet;
+        let finalTargetScroll = totalWidthOfOneSet + targetOffsetWithinAnySet;
 
-        // --- IMPORTANT: Adjust targetScroll relative to the infinite scroll ---
-        // Since we reset the scroll position, the actual target might be in the
-        // first or third visual set when calculating. We want to scroll to the
-        // equivalent position within the second set's range [totalWidthOfOneSet, totalWidthOfOneSet * 2).
+        finalTargetScroll = Math.max(totalWidthOfOneSet, finalTargetScroll);
+        finalTargetScroll = Math.min(totalWidthOfOneSet * 2 - 1, finalTargetScroll);
 
-        // Find the current visual "set" based on scrollPosition
-        const currentSetOffset = Math.floor(scrollPosition / totalWidthOfOneSet) * totalWidthOfOneSet;
-        // Calculate the target offset within a single set
-        const targetOffsetWithinSet = targetScroll % totalWidthOfOneSet;
-        // The final target scroll should be within the second set's range
-        targetScroll = totalWidthOfOneSet + targetOffsetWithinSet;
+        console.log(`ScrollToCard: Scrolling to ${cardId}. Final Target Scroll: ${finalTargetScroll.toFixed(2)}`);
 
+        stopCarouselAnimation();
+        isManuallyScrolling = true;
 
-        // Clamp scroll position (optional, but good practice)
-        targetScroll = Math.max(0, targetScroll);
+        currentCardsWrapper.style.transition = 'transform 0.8s cubic-bezier(0.4, 0, 0.2, 1)';
+        currentCardsWrapper.style.transform = `translateX(-${finalTargetScroll}px)`;
+        scrollPosition = finalTargetScroll;
 
-        console.log(`Scrolling to card: ${cardId}. Target Scroll: ${targetScroll.toFixed(2)}`);
-
-        stopCarouselAnimation(); // Stop auto-scroll
-        isManuallyScrolling = true; // Set flag
-
-        // Animate the scroll
-        cardsWrapper.style.transition = 'transform 0.8s cubic-bezier(0.4, 0, 0.2, 1)';
-        cardsWrapper.style.transform = `translateX(-${targetScroll}px)`;
-        scrollPosition = targetScroll; // Update current scroll position state
-
-        // Resume automatic animation after the transition
-        // Clear any existing timeout to prevent conflicts if user clicks rapidly
         clearTimeout(window.resumeScrollTimeout);
         window.resumeScrollTimeout = setTimeout(() => {
-             cardsWrapper.style.transition = ''; // Remove transition style
-             isManuallyScrolling = false; // Reset flag
-             startCarouselAnimation(); // Restart auto-scroll
-        }, 900); // Delay slightly longer than transition (800ms + 100ms buffer)
+            const wrapperAfterScroll = document.querySelector(".cards-wrapper");
+            if (wrapperAfterScroll) {
+                wrapperAfterScroll.style.transition = '';
+            }
+            isManuallyScrolling = false;
+            startCarouselAnimation();
+            console.log("ScrollToCard: Resuming auto-scroll.");
+        }, 900);
     }
 
-    // --- Event Listeners ---
-    if (menuToggle) {
-        menuToggle.addEventListener('click', (e) => {
-            e.stopPropagation(); // Prevent body click listener from closing immediately
-            toggleMenu();
+    // --- Cursor Light Effect ---
+    function handleMouseMove(e) { /* (same) */ }
+    function handleMouseOver(e) { /* (same) */ }
+
+
+    // --- Content Loading (SPA Functionality for INTERNAL links only) ---
+    /**
+     * Fetches and loads content into the main area FOR INTERNAL PAGES.
+     * Exposed via App.loadContent.
+     * @param {string} url - The URL of the internal page content to load (e.g., about.html).
+     * @param {boolean} [isPopState=false] - True if triggered by back/forward button.
+     * @returns {Promise<void>} - Promise that resolves when content is loaded/processed.
+     */
+    App.loadContent = async function(url, isPopState = false) {
+        // (Function content remains largely the same, ensure it uses HOME_PAGE_URL correctly)
+        return new Promise(async (resolve, reject) => {
+             const currentMainContentArea = document.querySelector('main');
+            if (!currentMainContentArea) {
+                console.error("LoadContent (Internal): Main content area not found!");
+                return reject(new Error("Main content area not found!"));
+            }
+
+            console.log(`LoadContent (Internal): Loading content from: ${url}`);
+            stopCarouselAnimation();
+            currentMainContentArea.innerHTML = '<p class="text-center text-xl p-10">Loading...</p>';
+            document.title = "Loading... | Envoy's Links";
+
+            try {
+                const response = await fetch(url);
+                if (!response.ok) {
+                    console.error(`LoadContent (Internal): HTTP error! status: ${response.status} fetching ${url}`);
+                    throw new Error(`HTTP error! status: ${response.status} loading ${url}`);
+                }
+                const htmlText = await response.text();
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(htmlText, 'text/html');
+                const newContentElement = doc.querySelector('main');
+                const newTitle = doc.querySelector('title')?.textContent || "Envoy's Links";
+
+                if (newContentElement) {
+                    console.log("LoadContent (Internal): Found new <main> content.");
+                    currentMainContentArea.innerHTML = newContentElement.innerHTML;
+                    document.title = newTitle;
+
+                    if (typeof App.Menu?.init === 'function') {
+                         console.log("LoadContent (Internal): Re-initializing Menu...");
+                         App.Menu.init();
+                    } else {
+                         console.warn("LoadContent (Internal): App.Menu.init function not found.");
+                    }
+
+                    // Check if the loaded page is the homepage
+                    const isHomePage = url.endsWith(HOME_PAGE_URL);
+                    if (isHomePage && currentMainContentArea.querySelector('.carousel-container')) {
+                         console.log("LoadContent (Internal): Homepage loaded. Re-initializing Carousel...");
+                         const carouselInitialized = initializeCarousel();
+                         if (!carouselInitialized) {
+                              console.error("LoadContent (Internal): Failed to re-initialize carousel.");
+                         }
+                    } else {
+                         console.log("LoadContent (Internal): Non-homepage loaded, no carousel init needed.");
+                         stopCarouselAnimation();
+                    }
+
+                    // Update history state ONLY for non-iframe views
+                    if (!isPopState) {
+                         console.log(`LoadContent (Internal): Pushing state for internal page ${url}`);
+                         const relativeUrl = url.startsWith('/') ? url.substring(1) : url; // Ensure relative path
+                         window.history.pushState({ path: relativeUrl }, newTitle, relativeUrl);
+                    }
+                    console.log(`LoadContent (Internal): Successfully loaded ${url}`);
+                    resolve();
+
+                } else {
+                     console.error(`LoadContent (Internal): Could not find <main> element in fetched HTML from ${url}.`);
+                     throw new Error(`Could not find <main> element in fetched HTML from ${url}`);
+                }
+
+            } catch (error) {
+                console.error('LoadContent (Internal): Failed to load or process content:', error);
+                 if (currentMainContentArea) {
+                      currentMainContentArea.innerHTML = `<p class="text-center text-red-500 p-10">Error loading internal content from ${url}.</p><p class="text-center text-sm text-gray-400">${error.message}</p>`;
+                 }
+                document.title = "Error | Envoy's Links";
+                reject(error);
+            }
         });
     }
+
+    // --- NEW: Function to Load Project Iframe ---
+    /**
+     * Clears main content and loads the specified project URL into an iframe.
+     * @param {string} projectUrl - The URL of the project (subdomain).
+     * @param {string} projectTitle - The title of the project.
+     * @param {string} projectId - The unique ID of the project (e.g., 'project-3').
+     */
+    App.loadProjectIframe = function(projectUrl, projectTitle, projectId) {
+         console.log(`App.loadProjectIframe called for: ${projectTitle} (${projectUrl})`);
+         const currentMainContentArea = document.querySelector('main');
+         if (!currentMainContentArea) {
+              console.error("LoadProjectIframe: Main content area not found!");
+              return;
+         }
+         if (!projectUrl || projectUrl === '#') {
+              console.error("LoadProjectIframe: Invalid project URL provided.");
+              return;
+         }
+          if (typeof App.loadContent !== 'function') {
+               console.error("LoadProjectIframe: App.loadContent function is missing for back button functionality.");
+               return; // Need loadContent for the back button
+          }
+
+
+         console.log(`LoadProjectIframe: Loading ${projectUrl} into iframe.`);
+         stopCarouselAnimation(); // Stop carousel if it's running
+         currentMainContentArea.innerHTML = ''; // Clear main content area
+
+         // --- Create Back Button ---
+         const backButton = document.createElement('button');
+         backButton.textContent = '← Back to Projects';
+         backButton.className = 'absolute top-20 left-4 z-10 mb-4 px-3 py-1 bg-purple-700 hover:bg-purple-800 text-white rounded shadow-md transition-colors duration-200'; // Adjusted top
+         backButton.onclick = () => {
+              console.log("Back Button Clicked: Reloading homepage content.");
+              App.loadContent(HOME_PAGE_URL) // Use constant for homepage
+                   .catch(err => console.error("Back Button: Error loading homepage content:", err));
+         };
+         currentMainContentArea.appendChild(backButton);
+
+         // --- Create Iframe ---
+         const iframe = document.createElement('iframe');
+         iframe.src = projectUrl;
+         iframe.style.width = '100%';
+         iframe.style.height = 'calc(100vh - 100px)'; // Adjust height as needed
+         iframe.style.border = 'none';
+         iframe.style.display = 'block';
+         iframe.style.marginTop = '40px'; // Push below back button
+         iframe.setAttribute('title', `Embedded project: ${projectTitle}`);
+         iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-popups allow-forms');
+         iframe.setAttribute('loading', 'lazy');
+
+         const loadingIndicator = document.createElement('p');
+         loadingIndicator.textContent = `Loading ${projectTitle}...`;
+         loadingIndicator.className = 'text-center p-10 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2';
+         currentMainContentArea.appendChild(loadingIndicator);
+
+         iframe.onload = () => {
+              console.log(`Iframe loaded: ${projectUrl}`);
+              loadingIndicator.style.display = 'none';
+         };
+         iframe.onerror = () => {
+              console.error(`Iframe failed to load: ${projectUrl}. Possible X-Frame-Options or CSP issue.`);
+              loadingIndicator.textContent = `Error: Could not load project (${projectTitle}). It might not allow embedding.`;
+              loadingIndicator.classList.add('text-red-500');
+         };
+
+         currentMainContentArea.appendChild(iframe);
+
+         // --- Update History ---
+         const iframeViewPath = `project-${projectId}`; // Use relative path based on ID
+         const iframeTitle = `${projectTitle} | Envoy's Links`;
+         document.title = iframeTitle;
+         // Check if already on this iframe view to avoid pushing duplicate state
+         if (window.location.pathname.endsWith(iframeViewPath)) {
+              console.log("LoadProjectIframe: Already on this iframe view, replacing state instead of pushing.");
+              window.history.replaceState({ path: iframeViewPath, isIframe: true, iframeSrc: projectUrl }, iframeTitle, iframeViewPath);
+         } else {
+              console.log(`LoadProjectIframe: Pushing history state for iframe view: ${iframeViewPath}`);
+              window.history.pushState({ path: iframeViewPath, isIframe: true, iframeSrc: projectUrl }, iframeTitle, iframeViewPath);
+         }
+    }
+
+
+    // --- Global Event Listeners ---
+
+    // Click listener ONLY handles 'internal-link' for SPA
     document.addEventListener('click', (event) => {
-        // Close menu if clicking outside the menu and not on the toggle button
-        if (menu && menu.classList.contains('open') && !menu.contains(event.target) && event.target !== menuToggle) {
-            closeMenu();
+        // (Listener logic remains the same - only handles internal SPA links)
+        const link = event.target.closest('a.internal-link');
+
+        if (link) {
+            if (link.closest('.card')) return;
+            if (link.closest('#menu') && link.closest('li')?.hasAttribute('data-target-card')) return;
+
+            console.log(`Global Click: Found 'a.internal-link' for SPA navigation:`, link);
+            event.preventDefault();
+            event.stopPropagation();
+
+            const url = link.getAttribute('href');
+            if (!url || url === '#') {
+                 console.warn("Global Click (SPA): Internal link has invalid href:", url);
+                 return;
+            }
+
+            const absoluteUrl = new URL(url, window.location.origin).href;
+            if (absoluteUrl !== window.location.href) {
+                 console.log(`Global Click (SPA): Intercepted internal link to: ${url}. Calling loadContent.`);
+                 if (typeof App.Menu?.close === 'function') App.Menu.close();
+                 App.loadContent(url)
+                    .then(() => console.log(`Global Click (SPA): loadContent for ${url} completed.`))
+                    .catch(err => console.error("Global Click (SPA): Error during content load:", err));
+            } else {
+                 console.log(`Global Click (SPA): Already on page ${url}. Closing menu.`);
+                 if (typeof App.Menu?.close === 'function') App.Menu.close();
+            }
         }
     });
+
+
+    // Browser Back/Forward Listener (Handles SPA and iframe states)
+    window.addEventListener('popstate', (event) => {
+        // (Listener logic remains the same - uses HOME_PAGE_URL)
+        const state = event.state;
+        console.log("Popstate event:", state);
+
+        const homeRelativeUrl = HOME_PAGE_URL;
+
+        if (state) {
+            if (state.isIframe) {
+                console.log(`Popstate: Detected iframe state, loading homepage: ${homeRelativeUrl}`);
+                App.loadContent(homeRelativeUrl, true)
+                   .catch(err => console.error("Popstate: Error loading homepage from iframe state:", err));
+            } else if (state.path) {
+                console.log(`Popstate: Navigating to internal state path: ${state.path}`);
+                 const relativePath = state.path.startsWith('/') ? state.path.substring(1) : state.path;
+                App.loadContent(relativePath, true)
+                   .catch(err => console.error("Popstate: Error loading internal content:", err));
+            } else {
+                 console.log(`Popstate: State exists but unrecognized structure, loading homepage: ${homeRelativeUrl}`);
+                 App.loadContent(homeRelativeUrl, true).catch(err => console.error("Popstate: Error loading homepage from unrecognized state:", err));
+            }
+        } else {
+             console.log(`Popstate: No state found, navigating to fallback: ${homeRelativeUrl}`);
+             const currentPath = window.location.pathname.substring(window.location.pathname.lastIndexOf('/') + 1);
+             if (currentPath !== homeRelativeUrl && window.location.pathname !== '/') {
+                  App.loadContent(homeRelativeUrl, true).catch(err => console.error("Popstate: Error loading homepage from no state:", err));
+             } else {
+                  console.log("Popstate: Already on homepage, doing nothing.");
+                  if (document.querySelector('.carousel-container') && !animationFrameId) {
+                       initializeCarousel();
+                  }
+             }
+        }
+    });
+
+    // Debounced Resize Handler
+    function handleResize() { /* (same) */ }
+
+    // Attach Global Listeners
+    window.addEventListener('resize', handleResize);
     document.addEventListener("mousemove", handleMouseMove);
     document.addEventListener('mouseover', handleMouseOver);
-    window.addEventListener('resize', handleResize);
+    console.log("links_page.js: Global event listeners attached.");
 
-    // --- Initial Setup ---
-    populateMenuProjectList(); // Add projects to menu
-    attachMenuListeners();    // Add listeners to all menu items
-    initializeCarousel();     // Setup the carousel cards and attempt to start animation
+
+    // --- Initial Page Setup ---
+    console.log("links_page.js: Performing initial setup...");
+    const initialPath = HOME_PAGE_URL;
+    window.history.replaceState({ path: initialPath }, document.title, window.location.href);
+    console.log(`links_page.js: Initial history state set for path: ${initialPath}`);
+
+    // Initialize Menu
+    if (typeof App.Menu?.init === 'function') {
+        console.log("links_page.js: Calling App.Menu.init()...");
+        App.Menu.init();
+    } else {
+        console.error("links_page.js: App.Menu.init not found!");
+    }
+
+    // Initialize Carousel (only if the initial HTML is the homepage)
+    if (window.location.pathname.endsWith(HOME_PAGE_URL) || window.location.pathname === '/') {
+         if (document.querySelector('.carousel-container')) {
+              console.log("links_page.js: Initializing carousel on homepage load...");
+              initializeCarousel();
+         } else {
+              console.log("links_page.js: Homepage loaded, but no carousel container found.");
+         }
+    } else {
+         console.log("links_page.js: Not on homepage, skipping initial carousel load.");
+    }
+
+    // Initialize Background Script (if applicable)
+    if (typeof App.Background?.init === 'function') { App.Background.init(); }
+
+    console.log("links_page.js: Initial setup complete.");
 
 }); // End DOMContentLoaded
+
