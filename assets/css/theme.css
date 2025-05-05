@@ -189,12 +189,6 @@
     clip-path: inset(50% 0% 50% 0%); /* Close to horizontal line */
 }
 
-/* --- Audio Prompt Style --- */
-#audio-prompt {
-   position: fixed; top: 10px; left: 10px; background-color: rgba(148, 30, 30, 0.6);
-   color: #ccc; padding: 5px 10px; font-size: 25px; border-radius: 3px;
-   z-index: 1001; cursor: pointer;
-}
 
 /* --- Audio Controls Styling --- */
 #audio-control-container {
