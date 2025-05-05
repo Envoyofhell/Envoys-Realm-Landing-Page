@@ -32,7 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
             id: "project-3",
             title: "Pokedex",
             description: "A web-based application that allows users to browse Pokémon by generation, search for specific Pokémon, and view detailed information including game stats, descriptions, moves, abilities, and related Trading Card Game (TCG) cards.",
-            // **FIX:** Changed path to root-relative (adjust if needed based on deployment structure)
+            // **PATH CHECK:** Verify '/src/dex.png' is correct on Cloudflare
             iconUrl: '/src/dex.png',
             projectUrl: "https://pokedex.meta-ptcg.org/", // Subdomain URL
             githubUrl: "https://github.com/Envoyofhell",
@@ -42,7 +42,7 @@ document.addEventListener('DOMContentLoaded', () => {
             id: "project-4",
             title: "BallsDex Card Maker",
             description: "A tool for creating stunning, interactive charts and graphs from complex datasets using D3.js.",
-             // **FIX:** Changed path to root-relative
+             // **PATH CHECK:** Verify '/src/ball.png' is correct on Cloudflare
             iconUrl: '/src/ball.png',
             projectUrl: "https://ballsdex.meta-ptcg.org/", // Subdomain URL
             githubUrl: "https://github.com/Envoyofhell",
@@ -52,7 +52,7 @@ document.addEventListener('DOMContentLoaded', () => {
             id: "project-5",
             title: "Poke Clicker",
             description: "A retro-themed Pokemon Clicker inspired by the popular cookie clicker game.",
-             // **FIX:** Changed path to root-relative
+             // **PATH CHECK:** Verify '/src/egg.png' is correct on Cloudflare
             iconUrl: '/src/egg.png',
             projectUrl: "https://clicker.meta-ptcg.org/", // Subdomain URL
             githubUrl: "https://github.com/Envoyofhell",
@@ -72,6 +72,7 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log("links_page.js: App.projects defined.");
 
     // --- DOM Element Selectors (Get elements *after* DOM is ready) ---
+    // These might be re-queried if content loads dynamically
     let cardsContainer = document.querySelector(".cards-container");
     let cardsWrapper = document.querySelector(".cards-wrapper");
     const cursorLight = document.querySelector(".cursor-light");
@@ -159,7 +160,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function initializeCarousel() {
-        console.log("Carousel: Attempting initialization..."); // Added log
+        console.log("Carousel: Attempting initialization...");
         // Re-query elements in case they were loaded dynamically
         cardsContainer = document.querySelector(".cards-container");
         cardsWrapper = document.querySelector(".cards-wrapper");
@@ -404,7 +405,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
 
                     // Check if the loaded page is the homepage
-                    // **FIX:** Use a more reliable check for homepage URL
                     const isHomePage = url === HOME_PAGE_URL || url === `/${HOME_PAGE_URL}` || (url === '/' && HOME_PAGE_URL === 'homepage.html');
                     console.log(`LoadContent (Internal): Checking if loaded URL '${url}' is homepage (${HOME_PAGE_URL}): ${isHomePage}`);
 
@@ -412,10 +412,13 @@ document.addEventListener('DOMContentLoaded', () => {
                          const carouselContainer = currentMainContentArea.querySelector('.carousel-container');
                          if (carouselContainer) {
                               console.log("LoadContent (Internal): Homepage loaded and contains carousel. Re-initializing Carousel...");
-                              const carouselInitialized = initializeCarousel(); // This function now finds elements internally
-                              if (!carouselInitialized) {
-                                   console.error("LoadContent (Internal): Failed to re-initialize carousel.");
-                              }
+                              // **FIX:** Ensure carousel init runs after DOM update
+                              requestAnimationFrame(() => {
+                                   const carouselInitialized = initializeCarousel();
+                                   if (!carouselInitialized) {
+                                        console.error("LoadContent (Internal): Failed to re-initialize carousel.");
+                                   }
+                              });
                          } else {
                               console.warn("LoadContent (Internal): Homepage loaded but '.carousel-container' not found in its <main> content.");
                          }
@@ -435,7 +438,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 } else {
                      console.error(`LoadContent (Internal): Could not find <main> element in fetched HTML from ${url}.`);
-                     // Display error message within the main content area
                      currentMainContentArea.innerHTML = `<p class="text-center text-red-500 p-10">Error: Could not parse content from ${url}. Missing &lt;main&gt; tag?</p>`;
                      reject(new Error(`Could not find <main> element in fetched HTML from ${url}`));
                 }
@@ -489,31 +491,38 @@ document.addEventListener('DOMContentLoaded', () => {
          };
          currentMainContentArea.appendChild(backButton);
 
+         // --- Create Loading Indicator (Spinner) ---
+         const loadingContainer = document.createElement('div');
+         // Center the container itself
+         loadingContainer.className = 'absolute inset-0 flex flex-col items-center justify-center text-gray-400';
+         loadingContainer.innerHTML = `
+            <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-purple-500 mb-4"></div>
+            <p>Loading ${projectTitle}...</p>
+         `;
+         currentMainContentArea.appendChild(loadingContainer);
+
+
          // --- Create Iframe ---
          const iframe = document.createElement('iframe');
          iframe.src = projectUrl;
          iframe.style.width = '100%';
          iframe.style.height = 'calc(100vh - 100px)'; // Adjust height as needed
          iframe.style.border = 'none';
-         iframe.style.display = 'block';
+         iframe.style.display = 'block'; // Changed from 'none' initially
+         iframe.style.visibility = 'hidden'; // Hide iframe initially
          iframe.style.marginTop = '40px'; // Push below back button
          iframe.setAttribute('title', `Embedded project: ${projectTitle}`);
          iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-popups allow-forms');
-         iframe.setAttribute('loading', 'lazy');
-
-         const loadingIndicator = document.createElement('p');
-         loadingIndicator.textContent = `Loading ${projectTitle}...`;
-         loadingIndicator.className = 'text-center p-10 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2';
-         currentMainContentArea.appendChild(loadingIndicator);
+         iframe.setAttribute('loading', 'eager'); // Load iframe eagerly now
 
          iframe.onload = () => {
               console.log(`Iframe loaded: ${projectUrl}`);
-              loadingIndicator.style.display = 'none';
+              loadingContainer.remove(); // Remove spinner container
+              iframe.style.visibility = 'visible'; // Show iframe
          };
          iframe.onerror = () => {
               console.error(`Iframe failed to load: ${projectUrl}. Possible X-Frame-Options or CSP issue.`);
-              loadingIndicator.textContent = `Error: Could not load project (${projectTitle}). It might not allow embedding.`;
-              loadingIndicator.classList.add('text-red-500');
+              loadingContainer.innerHTML = `<p class="text-red-500">Error: Could not load project (${projectTitle}). It might not allow embedding.</p>`; // Update text within spinner container
          };
 
          currentMainContentArea.appendChild(iframe);
@@ -598,7 +607,8 @@ document.addEventListener('DOMContentLoaded', () => {
              } else {
                   console.log("Popstate: Already on homepage, doing nothing.");
                   if (document.querySelector('.carousel-container') && !animationFrameId) {
-                       initializeCarousel();
+                       // Use rAF for safety on popstate re-init attempt
+                       requestAnimationFrame(initializeCarousel);
                   }
              }
         }
@@ -610,12 +620,10 @@ document.addEventListener('DOMContentLoaded', () => {
         resizeTimeout = setTimeout(() => {
             console.log("Resize: Window resized, recalculating layout...");
             stopCarouselAnimation();
-            // **FIX:** Check if carousel exists *before* trying to re-initialize
             const currentCarouselContainer = document.querySelector('.carousel-container');
             if (currentCarouselContainer) {
                  console.log("Resize: Carousel found, re-initializing...");
                  requestAnimationFrame(() => {
-                      // initializeCarousel now returns true/false
                       const carouselInitialized = initializeCarousel();
                       if (!carouselInitialized) {
                            console.error("Resize: Failed to re-initialize carousel after resize.");
@@ -643,36 +651,50 @@ document.addEventListener('DOMContentLoaded', () => {
     window.history.replaceState({ path: initialPath }, document.title, window.location.href);
     console.log(`links_page.js: Initial history state set for path: ${initialPath}`);
 
-    // **FIX:** Call Menu Init *after* potential Carousel Init
-    // Initialize Carousel first (if applicable)
-    // **FIX:** More robust check for homepage
-    const currentPagePath = window.location.pathname;
-    const isCurrentPageHome = currentPagePath === '/' || currentPagePath.endsWith('/' + HOME_PAGE_URL);
-    console.log(`links_page.js: Current path: ${currentPagePath}, Is homepage? ${isCurrentPageHome}`);
+    // **FIX:** Use requestAnimationFrame for initial setup to ensure DOM is fully ready
+    requestAnimationFrame(() => {
+        console.log("links_page.js: Running initial setup inside requestAnimationFrame...");
 
-    if (isCurrentPageHome) {
-         if (document.querySelector('.carousel-container')) {
-              console.log("links_page.js: Initializing carousel on homepage load...");
-              initializeCarousel(); // Initialize carousel first
-         } else {
-              console.log("links_page.js: Homepage loaded, but no carousel container found.");
-         }
-    } else {
-         console.log("links_page.js: Not on homepage, skipping initial carousel load.");
-    }
+        // Initialize Carousel first (if applicable)
+        const currentPagePath = window.location.pathname;
+        const isCurrentPageHome = currentPagePath === '/' || currentPagePath.endsWith('/' + HOME_PAGE_URL);
+        console.log(`links_page.js: Current path: ${currentPagePath}, Is homepage? ${isCurrentPageHome}`);
 
-    // Initialize Menu (now after potential carousel init)
-    if (typeof App.Menu?.init === 'function') {
-        console.log("links_page.js: Calling App.Menu.init()...");
-        App.Menu.init(); // Initialize menu after carousel attempt
-    } else {
-        console.error("links_page.js: App.Menu.init not found!");
-    }
+        let carouselInitPromise = Promise.resolve(); // Default to resolved promise
+
+        if (isCurrentPageHome) {
+             if (document.querySelector('.carousel-container')) {
+                  console.log("links_page.js: Initializing carousel on homepage load...");
+                  // Wrap in a promise if initializeCarousel needs to be async later
+                  carouselInitPromise = new Promise(resolveInit => {
+                       const success = initializeCarousel();
+                       resolveInit(success); // Resolve with success status
+                  });
+             } else {
+                  console.log("links_page.js: Homepage loaded, but no carousel container found.");
+             }
+        } else {
+             console.log("links_page.js: Not on homepage, skipping initial carousel load.");
+        }
+
+        // Initialize Menu *after* carousel attempt finishes
+        carouselInitPromise.then((carouselSuccess) => {
+             if (carouselSuccess === false) { // Check if carousel init failed
+                  console.warn("links_page.js: Carousel initialization failed, proceeding with Menu init anyway.");
+             }
+             if (typeof App.Menu?.init === 'function') {
+                  console.log("links_page.js: Calling App.Menu.init()...");
+                  App.Menu.init(); // Initialize menu
+             } else {
+                  console.error("links_page.js: App.Menu.init not found!");
+             }
+        });
 
 
-    // Initialize Background Script (if applicable)
-    if (typeof App.Background?.init === 'function') { App.Background.init(); }
+        // Initialize Background Script (if applicable)
+        if (typeof App.Background?.init === 'function') { App.Background.init(); }
 
-    console.log("links_page.js: Initial setup complete.");
+        console.log("links_page.js: Initial setup complete.");
+    }); // End requestAnimationFrame
 
 }); // End DOMContentLoaded
